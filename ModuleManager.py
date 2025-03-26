@@ -106,8 +106,3 @@ class ModuleManager:
             return False
         self.modules[name] = module
         return True
-
-
-if __name__ == "__main__":
-    ModuleManager.print_cool_loading_message()
-    print("This file is not meant to be run as a standalone script, but I'm glad you've found it anyway! ~SLACKSIRE")
