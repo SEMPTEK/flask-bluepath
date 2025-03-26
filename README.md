@@ -29,6 +29,18 @@ app.config[""]
 app.config.get("MODULES_DIRECTORY")
 ```
 
+## Module Structure
+📦example_module  
+ ┣ 📂static  
+ ┃ ┣ 📂css  
+ ┃ ┃ ┗ 📜example.css  
+ ┃ ┣ 📂images  
+ ┃ ┗ 📂js  
+ ┃ ┃ ┗ 📜example.js  
+ ┣ 📂templates  
+ ┃ ┗ 📜example.html  
+ ┗ 📜routing.py  
+
 ## Credits
 Written by John D McLaughlin (SLACKSIRE) and distributed under the [MIT License](/License.md), a copy of which can be found in the License.md file located within this package.
 
