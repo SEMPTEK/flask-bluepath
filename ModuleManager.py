@@ -41,20 +41,9 @@ class ModuleManager:
         self.load_modules_from_modules_directory()
 
     def print_cool_loading_message(self):
-        loading_message = '''
-    \nNow Loading
-==================================================================================================================
-
-    ███████╗██╗      █████╗ ███████╗██╗  ██╗    ███╗   ███╗ ██████╗ ██████╗ ██╗   ██╗██╗     ███████╗███████╗
-    ██╔════╝██║     ██╔══██╗██╔════╝██║ ██╔╝    ████╗ ████║██╔═══██╗██╔══██╗██║   ██║██║     ██╔════╝██╔════╝
-    █████╗  ██║     ███████║███████╗█████╔╝     ██╔████╔██║██║   ██║██║  ██║██║   ██║██║     █████╗  ███████╗
-    ██╔══╝  ██║     ██╔══██║╚════██║██╔═██╗     ██║╚██╔╝██║██║   ██║██║  ██║██║   ██║██║     ██╔══╝  ╚════██║
-    ██║     ███████╗██║  ██║███████║██║  ██╗    ██║ ╚═╝ ██║╚██████╔╝██████╔╝╚██████╔╝███████╗███████╗███████║
-    ╚═╝     ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚══════╝
-                                                            By: John McLaughlin (SLACKSIRE) under the MIT License
-==================================================================================================================
-        \n'''
-        print(loading_message)
+        with open("loading_message.dat", "r") as f:
+            loading_message = f.read()
+            print(loading_message)
 
     def __find_modules_directory(self) -> bool:
         '''Check if the app has a configured modules directory. If not, use default directory'''
@@ -117,3 +106,8 @@ class ModuleManager:
             return False
         self.modules[name] = module
         return True
+
+
+if __name__ == "__main__":
+    ModuleManager.print_cool_loading_message()
+    print("This file is not meant to be run as a standalone script, but I'm glad you've found it anyway! ~SLACKSIRE")
