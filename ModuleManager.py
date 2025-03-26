@@ -41,7 +41,7 @@ class ModuleManager:
         self.load_modules_from_modules_directory()
 
     def print_cool_loading_message(self):
-        with open("loading_message.dat", "r") as f:
+        with open("ascii_art.dat", "r") as f:
             loading_message = f.read()
             print(loading_message)
 
@@ -106,3 +106,7 @@ class ModuleManager:
             return False
         self.modules[name] = module
         return True
+
+
+if __name__ == "__main__":
+    ModuleManager(Flask(__name__))
