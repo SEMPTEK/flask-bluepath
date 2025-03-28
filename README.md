@@ -1,4 +1,4 @@
-# Flask Modules
+# Flask BluePath
 
 ## Table of Contents
 - [About](#about)
@@ -7,7 +7,7 @@
 - [Credits](#credits)
 
 ## About
-Flask Modules is built for the [Flask](https://palletsprojects.com/projects/flask) framework by [Pallets Projects](https://palletsprojects.com/). This package is designed to allow for quick loading of modules by using the name of the module directory as the name of the corresponding Flask blueprint. The Module Manager will review the directory and determine if the criteria have been met for a module, and it will load it as a blueprint.  
+Flask BluePath is built for the [Flask](https://palletsprojects.com/projects/flask) framework by [Pallets Projects](https://palletsprojects.com/). This package is designed to allow for quick loading of modules by using the name of the module directory as the name of the corresponding Flask blueprint. The Module Manager will review the directory and determine if the criteria have been met for a module, and it will load it as a blueprint.  
 This really is a lightweight and simple setup for automating  your blueprint creation. Enjoy!
 
 ## Requirements
@@ -20,6 +20,7 @@ This really is a lightweight and simple setup for automating  your blueprint cre
     - Using Flask config variables, you can set the modules directory to any directory within the application. See [Setting the Modules Directory](#setting-the-modules-directory) for more information.
 2. Build your flask module like you would any standard flask app; with the following modifications:
     - All flask 
+3. Be sure to **delete** the "example_module" folder prior to production. This module will be loaded as a blueprint if the modules directory is set to default.
 
 ## Setting the Modules Directory
 Setting the modules directory can be done using the flask configuration dictionary.

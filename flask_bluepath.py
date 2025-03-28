@@ -21,7 +21,7 @@ def register_module(module_name: str, modules_directory: str):
 
 
 class ModuleManager:
-    default_modules_directory = "Modules"
+    default_modules_directory = "modules"
     required_subdirectories = [
         'templates',
         'static',
