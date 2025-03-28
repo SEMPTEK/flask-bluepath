@@ -3,29 +3,32 @@ import os
 import importlib
 
 
-class Module:
-    required_subdirectories = ["templates", "static", "routing.py"]
-
-    def __init__(self, app: Flask, name: str, path: str, modules_dir_name: str):
-        self.app = app
-        self.name = name
-        self.path = path
-        self.modules_dir_name = modules_dir_name
-        self.blueprint = Blueprint(self.name, self.name, root_path=f"/{self.modules_dir_name}/{self.name}", static_url_path=f"/{self.name}/static", static_folder=f"{self.path}/static", template_folder=f"{self.path}/templates")
-        self.__init_routes()
-        self.app.register_blueprint(self.blueprint)
-
-    def __init_routes(self):
-        '''Import the routing module from the module and initialize the routes'''
-        bp_routing = importlib.import_module(f".{self.name}.routing", package=f"{self.modules_dir_name}")
-        bp_routing.init_routes(self.blueprint)
-        return True
+def register_module(app: Flask, module_name: str, modules_directory: str):
+    '''Initialize a module using importlib and Flask blueprints.'''
+    root_path = os.path.join(modules_directory, module_name)
+    static_url_path = os.path.join(module_name, "static")
+    static_fp = os.path.join(modules_directory, module_name, "static")
+    template_fp = os.path.join(modules_directory, module_name, "templates")
+    bp = Blueprint(module_name, module_name, root_path=root_path, static_url_path=static_url_path, static_folder=static_fp, template_folder=template_fp)
+    module_routing_import = f".{module_name}.routing"
+    bp_routing = importlib.import_module(module_routing_import, package=modules_directory)
+    try:
+        bp_routing.init_routes(bp)
+    except ImportError as e:
+        print(e)
+        return False
+    return True
 
 
 class ModuleManager:
-    default_modules_directory = "modules"
+    default_modules_directory = "Modules"
+    required_subdirectories = [
+        'templates',
+        'static',
+        'routing.py',
+    ]
 
-    def __init__(self, app: Flask):
+    def __init__(self, app: Flask, **kwargs):
         self.app = app
         self.modules = {}
         self.modules_directory = None
@@ -34,7 +37,8 @@ class ModuleManager:
             "__pycache__",
             "README.md",
             ]
-        self.print_cool_loading_message()
+        if not kwargs.get("loading_message"):
+            self.print_cool_loading_message()
         if not self.__find_modules_directory():
             app.logger.error("No modules directory found")
             return
@@ -88,7 +92,7 @@ class ModuleManager:
         print(f"Checking if directory {path} matches module structure")
         if not os.path.isdir(path):
             return False
-        for subdir in Module.required_subdirectories:
+        for subdir in self.required_subdirectories:
             if subdir not in os.listdir(path):
                 print(f"    Directory {path} does not match module structure: Missing {subdir}\n")
                 return False
@@ -101,12 +105,8 @@ class ModuleManager:
         if name in self.modules:
             print(f"    Module {name} already loaded\n")
             return False
-        module = Module(self.app, name, path, self.modules_directory_name)
-        if not module:
-            return False
-        self.modules[name] = module
-        return True
-
+        register_module(self.app, name, self.modules_directory_name)
 
 if __name__ == "__main__":
-    ModuleManager(Flask(__name__))
+    APP = Flask(__name__)
+    ModuleManager(APP)
