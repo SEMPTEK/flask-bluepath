@@ -1,1 +1,1 @@
-from .ModuleManager import ModuleManager
+from .flask_bluepath import ModuleManager
