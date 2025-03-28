@@ -3,7 +3,7 @@ import os
 import importlib
 
 
-def register_module(app: Flask, module_name: str, modules_directory: str):
+def register_module(module_name: str, modules_directory: str):
     '''Initialize a module using importlib and Flask blueprints.'''
     root_path = os.path.join(modules_directory, module_name)
     static_url_path = os.path.join(module_name, "static")
@@ -105,7 +105,7 @@ class ModuleManager:
         if name in self.modules:
             print(f"    Module {name} already loaded\n")
             return False
-        register_module(self.app, name, self.modules_directory_name)
+        register_module(name, self.modules_directory_name)
 
 if __name__ == "__main__":
     APP = Flask(__name__)
