@@ -45,7 +45,7 @@ app.config.get("MODULES_DIRECTORY")
  ┗ 📜routing.py  
 
  ## Module Manager
- The Member Module is the class that is called to initialize the module system.
+ The Module Manager is the class that is called to initialize the module system.
  ### Parameters
  - **app**: The Flask application object. ***REQUIRED***
 
