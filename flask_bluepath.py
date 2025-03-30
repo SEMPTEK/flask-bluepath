@@ -88,7 +88,3 @@ class ModuleManager:
         self.__check_if_directory_matches_module_structure(path)
         print(f"Loading {name} module from {path}")
         register_module(name, self.relative_directory)
-
-if __name__ == "__main__":
-    APP = Flask(__name__)
-    ModuleManager(APP)
