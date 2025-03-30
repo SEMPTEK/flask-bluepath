@@ -21,73 +21,57 @@ def register_module(module_name: str, modules_directory: str):
 
 
 class ModuleManager:
-    default_modules_directory = "modules"
+    '''
+    Module Manager is the core class of the bluepath system. Load this to enable the bluepath auto-import system for modules.
+    '''
     required_subdirectories = [
         'templates',
         'static',
         'routing.py',
     ]
 
-    def __init__(self, app: Flask, **kwargs):
+    def __init__(self, app: Flask, rel_dir: str = "modules", include: list = [], exclude: list = [], kill_the_beauty: bool = False):
         self.app = app
-        self.modules = {}
-        self.modules_directory = None
-        self.modules_directory_name = None
-        self.excluded_dir_names = [
-            "__pycache__",
-            "README.md",
-            ]
-        if not kwargs.get("loading_message"):
+        self.relative_directory = app.config.get("MODULES_DIRECTORY") or rel_dir
+        self.abs_path = os.path.join(os.getcwd(), self.relative_directory)
+        self.excluded_dir_names = exclude
+        self.included_dir_names = include
+        if not kill_the_beauty:
             self.print_cool_loading_message()
-        if not self.__find_modules_directory():
-            app.logger.error("No modules directory found")
-            return
-        self.load_modules_from_modules_directory()
+            self.print_exclusion_list()
+            self.print_inclusion_list()
+        if not os.path.exists(self.abs_path):
+            app.logger.error("Module Directory Not Found.", exc_info=True)
+        self.__load_modules_from_directory()
 
     def print_cool_loading_message(self):
+        '''Print an ascii art loading message.'''
         with open("ascii_art.dat", "r") as f:
-            loading_message = f.read()
-            print(loading_message)
+            print(f.read())
+            print("\n")
 
-    def __find_modules_directory(self) -> bool:
-        '''Check if the app has a configured modules directory. If not, use default directory'''
-        config_dir = os.path.join(self.app.root_path, self.app.config.get("MODULES_DIRECTORY")) if self.app.config.get("MODULES_DIRECTORY") else ""
-        default_dir = os.path.join(self.app.root_path, self.default_modules_directory)
-        if self.__set_modules_directory(config_dir):
-            self.modules_directory_name = self.app.config.get("MODULES_DIRECTORY")
-            return True
-        if self.__set_modules_directory(default_dir):
-            self.modules_directory_name = self.default_modules_directory
-            return True
-        self.app.logger.error("No modules directory found")
-        print(f"Attempted to find modules directory at '{config_dir}' and '{default_dir}'\nNo modules directory found.")
-        return False
+    def print_exclusion_list(self):
+        '''Print modules inclusion list to console'''
+        print("=" * 5 + " EXCLUDED ITEMS " + "=" * 5)
+        print(str(self.excluded_dir_names))
+        print("\n")
 
-    def __set_modules_directory(self, path: str):
-        '''Set the modules directory for the app. Recommned allowing the ModuleManager to find the directory using __find_modules_directory()'''
-        print(f"Checking for modules directory at '{path}'")
-        if os.path.exists(path):
-            self.modules_directory = path
-            print(f"    Modules directory found at '{path}'\nSetting modules directory.\n")
-            return True
-        return False
+    def print_inclusion_list(self):
+        '''Print modules exclusion list to console'''
+        print("=" * 5 + " INCLUDED ITEMS " + "=" * 5)
+        print(str(self.included_dir_names))
+        print("\n")
 
-    def load_modules_from_modules_directory(self):
+    def __load_modules_from_directory(self):
         '''List all directories in the modules directory and load them as modules if they match the required structure'''
-        found_items = os.listdir(self.modules_directory)
-        for item in found_items:
-            item_path = os.path.join(self.modules_directory, item)
-            if not self.check_if_directory_is_excluded(item_path) and self.check_if_directory_matches_module_structure(item_path):
-                self.load_module(item, os.path.join(self.modules_directory, item))
+        for item in os.listdir(self.abs_path):
+            item_path = os.path.join(self.relative_directory, item)
+            excluded = os.path.basename(item_path) in self.excluded_dir_names
+            included = os.path.basename(item_path) in self.included_dir_names or len(self.included_dir_names) == 0
+            if not excluded and included:
+                self.load_module(item, os.path.join(self.relative_directory, item))
 
-    def check_if_directory_is_excluded(self, path: str):
-        '''Check if a directory is excluded from being loaded as a module'''
-        if os.path.basename(path) in self.excluded_dir_names:
-            print(f"Directory {path} is excluded from being loaded as a module\n")
-            return True
-        return False
-
-    def check_if_directory_matches_module_structure(self, path: str):
+    def __check_if_directory_matches_module_structure(self, path: str):
         '''Check if a directory contains the required subdirectories'''
         print(f"Checking if directory {path} matches module structure")
         if not os.path.isdir(path):
@@ -101,11 +85,9 @@ class ModuleManager:
 
     def load_module(self, name: str, path: str):
         '''Load a module into the app'''
+        self.__check_if_directory_matches_module_structure(path)
         print(f"Loading {name} module from {path}")
-        if name in self.modules:
-            print(f"    Module {name} already loaded\n")
-            return False
-        register_module(name, self.modules_directory_name)
+        register_module(name, self.relative_directory)
 
 if __name__ == "__main__":
     APP = Flask(__name__)
