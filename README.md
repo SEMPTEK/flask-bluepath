@@ -4,6 +4,7 @@
 - [About](#about)
 - [Requirements](#requirements)
 - [Getting Started](#getting-started)
+- [Module Manager](#module-manager)
 - [Credits](#credits)
 
 ## About
@@ -43,12 +44,24 @@ app.config.get("MODULES_DIRECTORY")
  ┃ ┗ 📜example.html  
  ┗ 📜routing.py  
 
+ ## Module Manager
+ The Member Module is the class that is called to initialize the module system.
+ ### Parameters
+ - **rel_dir**: The path to the directory relative to the main flask app.  
+ -- Default: "modules"  
+
+ - **include**: A whitelist of modules to include. Utilizing this parameter will automatically exclude all items not on this list.  
+ -- Default: []  
+
+ - **exclude**: A blacklist of modules to exclude. Unlike the "include" parameter, this doesn't affect any modules outside of the ones in this list.  
+ -- Default: []
  
  ## Calling Static Files from Templatea
  Calling an image from the blueprint (module's) static folder requires using url_for. See below for the syntax, or view the [Official Jinja Documentation](https://jinja.palletsprojects.com/en/stable/).
  ```
  {{ url_for("<module_name>.static") filename="images/example.png" }}
  ```
+
 
 ## Credits
 Written by John D McLaughlin (SLACKSIRE) and distributed under the [MIT License](/License.md), a copy of which can be found in the License.md file located within this package.
