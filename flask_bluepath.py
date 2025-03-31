@@ -3,21 +3,18 @@ import os
 import importlib
 
 
-def register_module(module_name: str, modules_directory: str):
+def register_module(module_name: str, modules_dirname: str):
     '''Initialize a module using importlib and Flask blueprints.'''
-    root_path = os.path.join(modules_directory, module_name)
-    static_url_path = os.path.join(module_name, "static")
-    static_fp = os.path.join(modules_directory, module_name, "static")
-    template_fp = os.path.join(modules_directory, module_name, "templates")
-    bp = Blueprint(module_name, module_name, root_path=root_path, static_url_path=static_url_path, static_folder=static_fp, template_folder=template_fp)
+    path = os.path.join(os.getcwd(), modules_dirname, module_name)
+    bp = Blueprint(module_name, module_name, root_path=f"/{modules_dirname}/{module_name}", static_url_path=f"/{module_name}/static", static_folder=f"{path}/static", template_folder=f"{path}/templates")
     module_routing_import = f".{module_name}.routing"
-    bp_routing = importlib.import_module(module_routing_import, package=modules_directory)
+    bp_routing = importlib.import_module(module_routing_import, package=modules_dirname)
     try:
         bp_routing.init_routes(bp)
     except ImportError as e:
         print(e)
-        return False
-    return True
+        return None
+    return bp
 
 
 class ModuleManager:
@@ -30,12 +27,13 @@ class ModuleManager:
         'routing.py',
     ]
 
-    def __init__(self, app: Flask, rel_dir: str = "modules", include: list = [], exclude: list = [], kill_the_beauty: bool = False):
+    def __init__(self, app: Flask, rel_dir: str = os.path.relpath("Modules"), include: list = [], exclude: list = [], kill_the_beauty: bool = False):
         self.app = app
-        self.relative_directory = app.config.get("MODULES_DIRECTORY") or rel_dir
-        self.abs_path = os.path.join(os.getcwd(), self.relative_directory)
+        self.relative_path = app.config.get("MODULES_DIRECTORY") or rel_dir
+        self.abs_path = os.path.join(self.app.root_path, self.relative_path)
         self.excluded_dir_names = exclude
         self.included_dir_names = include
+
         if not kill_the_beauty:
             self.print_cool_loading_message()
             self.print_exclusion_list()
@@ -46,7 +44,8 @@ class ModuleManager:
 
     def print_cool_loading_message(self):
         '''Print an ascii art loading message.'''
-        with open("ascii_art.dat", "r") as f:
+        fp = os.path.join(os.getcwd(), "flask_bluepath/ascii_art.dat")
+        with open(fp, "r") as f:
             print(f.read())
             print("\n")
 
@@ -65,11 +64,11 @@ class ModuleManager:
     def __load_modules_from_directory(self):
         '''List all directories in the modules directory and load them as modules if they match the required structure'''
         for item in os.listdir(self.abs_path):
-            item_path = os.path.join(self.relative_directory, item)
+            item_path = os.path.join(self.relative_path, item)
             excluded = os.path.basename(item_path) in self.excluded_dir_names
             included = os.path.basename(item_path) in self.included_dir_names or len(self.included_dir_names) == 0
             if not excluded and included:
-                self.load_module(item, os.path.join(self.relative_directory, item))
+                self.load_module(item, os.path.join(self.relative_path, item))
 
     def __check_if_directory_matches_module_structure(self, path: str):
         '''Check if a directory contains the required subdirectories'''
@@ -85,6 +84,6 @@ class ModuleManager:
 
     def load_module(self, name: str, path: str):
         '''Load a module into the app'''
-        self.__check_if_directory_matches_module_structure(path)
+        if not self.__check_if_directory_matches_module_structure(path): return
         print(f"Loading {name} module from {path}")
-        register_module(name, self.relative_directory)
+        self.app.register_blueprint(register_module(name, self.relative_path))
