@@ -1,7 +1,6 @@
 from flask import Flask, Blueprint
 import os
 import importlib
-import sys
 
 
 def register_module(module_name: str, modules_dirname: str, app_root_path):
@@ -47,7 +46,7 @@ class ModuleManager:
 
     def print_cool_loading_message(self):
         '''Print an ascii art loading message.'''
-        fp = os.path.join("flask_bluepath", "ascii_art.dat")
+        fp = os.path.join(self.app.root_path, "flask_bluepath", "ascii_art.dat")
         with open(fp, "r") as f:
             print(f.read())
             print("\n")
